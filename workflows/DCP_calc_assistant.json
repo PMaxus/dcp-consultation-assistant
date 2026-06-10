@@ -1,0 +1,1780 @@
+{
+    "name":  "DCP_calc_assistant",
+    "nodes":  [
+                  {
+                      "parameters":  {
+                                         "updates":  [
+                                                         "message"
+                                                     ],
+                                         "additionalFields":  {
+
+                                                              }
+                                     },
+                      "type":  "n8n-nodes-base.telegramTrigger",
+                      "typeVersion":  1.2,
+                      "position":  [
+                                       -2400,
+                                       16
+                                   ],
+                      "id":  "4dd91cb3-2794-4ebc-85b8-39a83b88deb5",
+                      "name":  "Telegram Trigger",
+                      "credentials":  {
+                                          "telegramApi":  {
+                                                              "id":  "",
+                                                              "name":  "Telegram account"
+                                                          }
+                                      }
+                  },
+                  {
+                      "parameters":  {
+                                         "sessionIdType":  "customKey",
+                                         "sessionKey":  "={{ $(\u0027set memory id\u0027).item.json.memory_key }}",
+                                         "tableName":  "dcp_chat_history",
+                                         "contextWindowLength":  90
+                                     },
+                      "type":  "@n8n/n8n-nodes-langchain.memoryPostgresChat",
+                      "typeVersion":  1.3,
+                      "position":  [
+                                       1408,
+                                       448
+                                   ],
+                      "id":  "4e6894fc-ee24-4071-9b72-9b0e5d225ea5",
+                      "name":  "Postgres Chat Memory",
+                      "credentials":  {
+                                          "postgres":  {
+                                                           "id":  "",
+                                                           "name":  "Postgres account"
+                                                       }
+                                      }
+                  },
+                  {
+                      "parameters":  {
+                                         "schema":  {
+                                                        "__rl":  true,
+                                                        "mode":  "list",
+                                                        "value":  "public"
+                                                    },
+                                         "table":  {
+                                                       "__rl":  true,
+                                                       "value":  "dcp_sessions",
+                                                       "mode":  "list",
+                                                       "cachedResultName":  "dcp_sessions"
+                                                   },
+                                         "columns":  {
+                                                         "mappingMode":  "defineBelow",
+                                                         "value":  {
+                                                                       "telegram_user_id":  "={{ $(\u0027Telegram Trigger\u0027).item.json.message.from.id }}",
+                                                                       "session_id":  "={{ $json.data }}",
+                                                                       "memory_key":  "={{$(\u0027Telegram Trigger\u0027).item.json.message.from.id + \"/\" + $json.data }}",
+                                                                       "status":  "open",
+                                                                       "created_at":  "={{ $now }}",
+                                                                       "last_activity_at":  "={{ $now }}"
+                                                                   },
+                                                         "matchingColumns":  [
+
+                                                                             ],
+                                                         "schema":  [
+                                                                        {
+                                                                            "id":  "session_id",
+                                                                            "displayName":  "session_id",
+                                                                            "required":  true,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  true
+                                                                        },
+                                                                        {
+                                                                            "id":  "telegram_user_id",
+                                                                            "displayName":  "telegram_user_id",
+                                                                            "required":  true,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "number",
+                                                                            "canBeUsedToMatch":  true
+                                                                        },
+                                                                        {
+                                                                            "id":  "memory_key",
+                                                                            "displayName":  "memory_key",
+                                                                            "required":  true,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  true
+                                                                        },
+                                                                        {
+                                                                            "id":  "status",
+                                                                            "displayName":  "status",
+                                                                            "required":  true,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  true
+                                                                        },
+                                                                        {
+                                                                            "id":  "created_at",
+                                                                            "displayName":  "created_at",
+                                                                            "required":  true,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "dateTime",
+                                                                            "canBeUsedToMatch":  true
+                                                                        },
+                                                                        {
+                                                                            "id":  "last_activity_at",
+                                                                            "displayName":  "last_activity_at",
+                                                                            "required":  true,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "dateTime",
+                                                                            "canBeUsedToMatch":  true
+                                                                        },
+                                                                        {
+                                                                            "id":  "closed_reason",
+                                                                            "displayName":  "closed_reason",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  true,
+                                                                            "removed":  true
+                                                                        }
+                                                                    ],
+                                                         "attemptToConvertTypes":  false,
+                                                         "convertFieldsToString":  false
+                                                     },
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "type":  "n8n-nodes-base.postgres",
+                      "typeVersion":  2.6,
+                      "position":  [
+                                       -288,
+                                       128
+                                   ],
+                      "id":  "d49b0411-7ffa-4084-9e10-88de15a3259d",
+                      "name":  "Insert rows in a table",
+                      "credentials":  {
+                                          "postgres":  {
+                                                           "id":  "",
+                                                           "name":  "Postgres account"
+                                                       }
+                                      }
+                  },
+                  {
+                      "parameters":  {
+                                         "action":  "generate"
+                                     },
+                      "type":  "n8n-nodes-base.crypto",
+                      "typeVersion":  1,
+                      "position":  [
+                                       -496,
+                                       176
+                                   ],
+                      "id":  "e8cb6371-8c1f-4bd1-85d1-2ed6caa96b89",
+                      "name":  "Generate UUID"
+                  },
+                  {
+                      "parameters":  {
+                                         "conditions":  {
+                                                            "options":  {
+                                                                            "caseSensitive":  true,
+                                                                            "leftValue":  "",
+                                                                            "typeValidation":  "strict",
+                                                                            "version":  3
+                                                                        },
+                                                            "conditions":  [
+                                                                               {
+                                                                                   "id":  "942c0a40-860d-4471-aee9-29255dca5012",
+                                                                                   "leftValue":  "={{$json.telegram_user_id}}",
+                                                                                   "rightValue":  "",
+                                                                                   "operator":  {
+                                                                                                    "type":  "string",
+                                                                                                    "operation":  "exists",
+                                                                                                    "singleValue":  true
+                                                                                                }
+                                                                               }
+                                                                           ],
+                                                            "combinator":  "and"
+                                                        },
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "type":  "n8n-nodes-base.if",
+                      "typeVersion":  2.3,
+                      "position":  [
+                                       -1168,
+                                       32
+                                   ],
+                      "id":  "7f928e4d-bc0b-4694-ac5d-28a42cee5ee3",
+                      "name":  "Open session exists?"
+                  },
+                  {
+                      "parameters":  {
+                                         "operation":  "select",
+                                         "schema":  {
+                                                        "__rl":  true,
+                                                        "mode":  "list",
+                                                        "value":  "public"
+                                                    },
+                                         "table":  {
+                                                       "__rl":  true,
+                                                       "value":  "dcp_sessions",
+                                                       "mode":  "list",
+                                                       "cachedResultName":  "dcp_sessions"
+                                                   },
+                                         "where":  {
+                                                       "values":  [
+                                                                      {
+                                                                          "column":  "telegram_user_id",
+                                                                          "value":  "={{ $json.message.from.id }}"
+                                                                      },
+                                                                      {
+                                                                          "column":  "status",
+                                                                          "value":  "open"
+                                                                      }
+                                                                  ]
+                                                   },
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "type":  "n8n-nodes-base.postgres",
+                      "typeVersion":  2.6,
+                      "position":  [
+                                       -1552,
+                                       32
+                                   ],
+                      "id":  "5196e1ef-046a-4904-96a1-3ec97b7e2fa7",
+                      "name":  "Search opened session",
+                      "alwaysOutputData":  true,
+                      "credentials":  {
+                                          "postgres":  {
+                                                           "id":  "",
+                                                           "name":  "Postgres account"
+                                                       }
+                                      }
+                  },
+                  {
+                      "parameters":  {
+                                         "resource":  "file",
+                                         "fileId":  "={{ $(\u0027Telegram Trigger\u0027).item.json.message.voice.file_id }}",
+                                         "additionalFields":  {
+
+                                                              }
+                                     },
+                      "type":  "n8n-nodes-base.telegram",
+                      "typeVersion":  1.2,
+                      "position":  [
+                                       480,
+                                       -64
+                                   ],
+                      "id":  "d5770cbe-6e9d-4cdf-b47e-746e6672149e",
+                      "name":  "Get a file",
+                      "credentials":  {
+                                          "telegramApi":  {
+                                                              "id":  "",
+                                                              "name":  "Telegram account"
+                                                          }
+                                      }
+                  },
+                  {
+                      "parameters":  {
+                                         "resource":  "audio",
+                                         "operation":  "transcribe",
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "type":  "@n8n/n8n-nodes-langchain.openAi",
+                      "typeVersion":  2.1,
+                      "position":  [
+                                       672,
+                                       -64
+                                   ],
+                      "id":  "9e266111-cbcd-4bed-a067-fc4c375d01b8",
+                      "name":  "Transcribe a recording",
+                      "credentials":  {
+                                          "openAiApi":  {
+                                                            "id":  "",
+                                                            "name":  "OpenAI account"
+                                                        }
+                                      }
+                  },
+                  {
+                      "parameters":  {
+                                         "assignments":  {
+                                                             "assignments":  [
+                                                                                 {
+                                                                                     "id":  "deae1ea2-0378-4784-b0a3-8775d07ad311",
+                                                                                     "name":  "text",
+                                                                                     "value":  "={{ $(\u0027Telegram Trigger\u0027).item.json.message.text }}",
+                                                                                     "type":  "string"
+                                                                                 }
+                                                                             ]
+                                                         },
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "type":  "n8n-nodes-base.set",
+                      "typeVersion":  3.4,
+                      "position":  [
+                                       544,
+                                       128
+                                   ],
+                      "id":  "336174f5-d2cb-4682-9f62-f2a4d97e1411",
+                      "name":  "set as text"
+                  },
+                  {
+                      "parameters":  {
+                                         "assignments":  {
+                                                             "assignments":  [
+                                                                                 {
+                                                                                     "id":  "eaf62891-ef09-4e37-bc6e-bc9caad915cd",
+                                                                                     "name":  "text",
+                                                                                     "value":  "={{ $json.text }}",
+                                                                                     "type":  "string"
+                                                                                 }
+                                                                             ]
+                                                         },
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "type":  "n8n-nodes-base.set",
+                      "typeVersion":  3.4,
+                      "position":  [
+                                       992,
+                                       32
+                                   ],
+                      "id":  "25d2b0ee-cda3-447d-9de8-18ba58ba424b",
+                      "name":  "set as any text"
+                  },
+                  {
+                      "parameters":  {
+                                         "rules":  {
+                                                       "values":  [
+                                                                      {
+                                                                          "conditions":  {
+                                                                                             "options":  {
+                                                                                                             "caseSensitive":  true,
+                                                                                                             "leftValue":  "",
+                                                                                                             "typeValidation":  "strict",
+                                                                                                             "version":  3
+                                                                                                         },
+                                                                                             "conditions":  [
+                                                                                                                {
+                                                                                                                    "id":  "5dd3311c-a829-4fca-bdec-4fdbfdc317c1",
+                                                                                                                    "leftValue":  "={{ $(\u0027Telegram Trigger\u0027).item.json.message.voice }}",
+                                                                                                                    "rightValue":  "",
+                                                                                                                    "operator":  {
+                                                                                                                                     "type":  "object",
+                                                                                                                                     "operation":  "exists",
+                                                                                                                                     "singleValue":  true
+                                                                                                                                 }
+                                                                                                                }
+                                                                                                            ],
+                                                                                             "combinator":  "and"
+                                                                                         },
+                                                                          "renameOutput":  true,
+                                                                          "outputKey":  "voice"
+                                                                      },
+                                                                      {
+                                                                          "conditions":  {
+                                                                                             "options":  {
+                                                                                                             "caseSensitive":  true,
+                                                                                                             "leftValue":  "",
+                                                                                                             "typeValidation":  "strict",
+                                                                                                             "version":  3
+                                                                                                         },
+                                                                                             "conditions":  [
+                                                                                                                {
+                                                                                                                    "leftValue":  "={{ $(\u0027Telegram Trigger\u0027).item.json.message.text }}",
+                                                                                                                    "rightValue":  "",
+                                                                                                                    "operator":  {
+                                                                                                                                     "type":  "string",
+                                                                                                                                     "operation":  "exists",
+                                                                                                                                     "singleValue":  true
+                                                                                                                                 },
+                                                                                                                    "id":  "70dd76b1-af58-4312-854f-97084aba121b"
+                                                                                                                }
+                                                                                                            ],
+                                                                                             "combinator":  "and"
+                                                                                         },
+                                                                          "renameOutput":  true,
+                                                                          "outputKey":  "text"
+                                                                      }
+                                                                  ]
+                                                   },
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "type":  "n8n-nodes-base.switch",
+                      "typeVersion":  3.4,
+                      "position":  [
+                                       208,
+                                       0
+                                   ],
+                      "id":  "d05c85b3-1b2e-472c-9845-ab258c7a7986",
+                      "name":  "Switch"
+                  },
+                  {
+                      "parameters":  {
+                                         "assignments":  {
+                                                             "assignments":  [
+                                                                                 {
+                                                                                     "id":  "3da2568e-2ea0-425f-9860-6cab43515a50",
+                                                                                     "name":  "memory_key",
+                                                                                     "value":  "={{ $json.memory_key }}",
+                                                                                     "type":  "string"
+                                                                                 }
+                                                                             ]
+                                                         },
+                                         "includeOtherFields":  true,
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "type":  "n8n-nodes-base.set",
+                      "typeVersion":  3.4,
+                      "position":  [
+                                       -16,
+                                       0
+                                   ],
+                      "id":  "2a99e93c-a2d2-43cf-b510-def9e1ced8dd",
+                      "name":  "set memory id"
+                  },
+                  {
+                      "parameters":  {
+                                         "conditions":  {
+                                                            "options":  {
+                                                                            "caseSensitive":  true,
+                                                                            "leftValue":  "",
+                                                                            "typeValidation":  "strict",
+                                                                            "version":  3
+                                                                        },
+                                                            "conditions":  [
+                                                                               {
+                                                                                   "id":  "e7e07a53-23b8-4b67-922b-b73d93518f6e",
+                                                                                   "leftValue":  "={{ (Date.now() - new Date($json.last_activity_at).getTime()) / (1000 * 60 * 60) }}",
+                                                                                   "rightValue":  "={{ 8 }}",
+                                                                                   "operator":  {
+                                                                                                    "type":  "number",
+                                                                                                    "operation":  "lt"
+                                                                                                }
+                                                                               }
+                                                                           ],
+                                                            "combinator":  "and"
+                                                        },
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "type":  "n8n-nodes-base.if",
+                      "typeVersion":  2.3,
+                      "position":  [
+                                       -944,
+                                       -96
+                                   ],
+                      "id":  "7bbf290c-49ac-4d06-84cf-0ca2759ba88c",
+                      "name":  "If last activity \u003e 8h"
+                  },
+                  {
+                      "parameters":  {
+                                         "operation":  "update",
+                                         "schema":  {
+                                                        "__rl":  true,
+                                                        "mode":  "list",
+                                                        "value":  "public"
+                                                    },
+                                         "table":  {
+                                                       "__rl":  true,
+                                                       "value":  "dcp_sessions",
+                                                       "mode":  "list",
+                                                       "cachedResultName":  "dcp_sessions"
+                                                   },
+                                         "columns":  {
+                                                         "mappingMode":  "defineBelow",
+                                                         "value":  {
+                                                                       "session_id":  "={{ $json.session_id }}",
+                                                                       "telegram_user_id":  "={{ $json.telegram_user_id }}",
+                                                                       "closed_reason":  "inactivity",
+                                                                       "status":  "closed"
+                                                                   },
+                                                         "matchingColumns":  [
+                                                                                 "session_id",
+                                                                                 "telegram_user_id"
+                                                                             ],
+                                                         "schema":  [
+                                                                        {
+                                                                            "id":  "session_id",
+                                                                            "displayName":  "session_id",
+                                                                            "required":  true,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  true,
+                                                                            "removed":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "telegram_user_id",
+                                                                            "displayName":  "telegram_user_id",
+                                                                            "required":  true,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "number",
+                                                                            "canBeUsedToMatch":  true,
+                                                                            "removed":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "memory_key",
+                                                                            "displayName":  "memory_key",
+                                                                            "required":  true,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  true,
+                                                                            "removed":  true
+                                                                        },
+                                                                        {
+                                                                            "id":  "status",
+                                                                            "displayName":  "status",
+                                                                            "required":  true,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  true,
+                                                                            "removed":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "created_at",
+                                                                            "displayName":  "created_at",
+                                                                            "required":  true,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "dateTime",
+                                                                            "canBeUsedToMatch":  true,
+                                                                            "removed":  true
+                                                                        },
+                                                                        {
+                                                                            "id":  "last_activity_at",
+                                                                            "displayName":  "last_activity_at",
+                                                                            "required":  true,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "dateTime",
+                                                                            "canBeUsedToMatch":  true,
+                                                                            "removed":  true
+                                                                        },
+                                                                        {
+                                                                            "id":  "closed_reason",
+                                                                            "displayName":  "closed_reason",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  true
+                                                                        }
+                                                                    ],
+                                                         "attemptToConvertTypes":  false,
+                                                         "convertFieldsToString":  false
+                                                     },
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "type":  "n8n-nodes-base.postgres",
+                      "typeVersion":  2.6,
+                      "position":  [
+                                       -720,
+                                       64
+                                   ],
+                      "id":  "f858538e-6326-41bb-a1ea-55932201354f",
+                      "name":  "set closed",
+                      "credentials":  {
+                                          "postgres":  {
+                                                           "id":  "",
+                                                           "name":  "Postgres account"
+                                                       }
+                                      }
+                  },
+                  {
+                      "parameters":  {
+                                         "conditions":  {
+                                                            "options":  {
+                                                                            "caseSensitive":  true,
+                                                                            "leftValue":  "",
+                                                                            "typeValidation":  "strict",
+                                                                            "version":  3
+                                                                        },
+                                                            "conditions":  [
+                                                                               {
+                                                                                   "id":  "a984092f-6906-4dac-bccb-a301fd254c91",
+                                                                                   "leftValue":  "={{ $json.message.text }}",
+                                                                                   "rightValue":  "/start",
+                                                                                   "operator":  {
+                                                                                                    "type":  "string",
+                                                                                                    "operation":  "equals"
+                                                                                                }
+                                                                               }
+                                                                           ],
+                                                            "combinator":  "and"
+                                                        },
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "type":  "n8n-nodes-base.if",
+                      "typeVersion":  2.3,
+                      "position":  [
+                                       -1808,
+                                       16
+                                   ],
+                      "id":  "4239ae53-a36a-431d-b5cf-e9042ca01efc",
+                      "name":  "If"
+                  },
+                  {
+                      "parameters":  {
+                                         "chatId":  "={{ $json.message.from.id }}",
+                                         "text":  "=Здравствуйте! Я пилотный бот DCP версии {{ $json.version }} 🤖🎬\nЯ помогу вам быстро получить расчёт стоимости по нашим услугам 💶📋\n\nЧтобы посчитать точно, напишите (можно голосом 🎙️):\n\n1. Что нужно сделать (например: DCP (Digital Cinema Package, «цифровой кинопакет»), конвертация, проверка, KDM (Key Delivery Message, «ключ доступа») и т. п.) 🧩\n2. Длительность (в минутах) ⏱️\n3. Есть ли 4K / 3D 📺🕶️\n4. Название проекта/фильма 🎞️\n5. Для каких целей готовите материал: кинотеатр / фестиваль / онлайн 🌍\n\nВ ответ я пришлю расчёт строками: услуга → цена → пояснение → **Итого** ✅\n\n---\n\n🛠️ **Сообщения о проблемах (обратная связь)**\nВ боте предусмотрена фиксация ошибок и несостыковок.\nЕсли вы заметили проблему (например, неверный расчёт, не ту услугу, странный вопрос или формулировку), пожалуйста, напишите об этом боту ✍️ или отправьте голосовое сообщение 🎙️\n\nЧем подробнее описание (что именно было не так и как должно быть), тем быстрее мы все исправим! 🧠⚙️\n",
+                                         "additionalFields":  {
+                                                                  "appendAttribution":  false
+                                                              }
+                                     },
+                      "type":  "n8n-nodes-base.telegram",
+                      "typeVersion":  1.2,
+                      "position":  [
+                                       -1536,
+                                       -176
+                                   ],
+                      "id":  "f27f0976-58dc-4289-8151-87f0bfa70766",
+                      "name":  "Hello!",
+                      "credentials":  {
+                                          "telegramApi":  {
+                                                              "id":  "",
+                                                              "name":  "Telegram account"
+                                                          }
+                                      }
+                  },
+                  {
+                      "parameters":  {
+                                         "descriptionType":  "manual",
+                                         "toolDescription":  "Issue Tracker — фиксация проблем\nИспользуй этот инструмент, когда клиент явно сообщает о проблеме в работе бота: неверный расчёт, неправильная услуга, некорректная формулировка, пропущенные вопросы, сбитая логика, “не так понял”, “не то посчитал” и т.п.\nИнструмент нужно вызывать даже если сообщение комбинированное (жалоба + новый запрос). После вызова продолжай основную работу.\nНикогда не упоминай название инструмента клиенту. В ответе клиенту обязательно добавь фразу: «Ваше замечание зафиксировано в трекере неисправностей.»",
+                                         "schema":  {
+                                                        "__rl":  true,
+                                                        "mode":  "list",
+                                                        "value":  "public"
+                                                    },
+                                         "table":  {
+                                                       "__rl":  true,
+                                                       "value":  "issue_tracking",
+                                                       "mode":  "list",
+                                                       "cachedResultName":  "issue_tracking"
+                                                   },
+                                         "columns":  {
+                                                         "mappingMode":  "defineBelow",
+                                                         "value":  {
+                                                                       "agent":  "DCP_calc_assistant",
+                                                                       "client":  "DCP",
+                                                                       "issue_content":  "={{ $(\u0027set as any text\u0027).item.json.text }}",
+                                                                       "status":  "unsolved",
+                                                                       "issue_type":  "prompt",
+                                                                       "source":  "telegramm",
+                                                                       "created_at":  "={{ $now }}",
+                                                                       "updated_at":  "={{ $now }}",
+                                                                       "Agent_quess":  "=В данном боте актуально использовать memory_id из памяти:{{ $(\u0027set memory id\u0027).item.json.memory_key }}"
+                                                                   },
+                                                         "matchingColumns":  [
+                                                                                 "id"
+                                                                             ],
+                                                         "schema":  [
+                                                                        {
+                                                                            "id":  "id",
+                                                                            "displayName":  "id",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  true,
+                                                                            "display":  true,
+                                                                            "type":  "number",
+                                                                            "canBeUsedToMatch":  true,
+                                                                            "removed":  true
+                                                                        },
+                                                                        {
+                                                                            "id":  "agent",
+                                                                            "displayName":  "agent",
+                                                                            "required":  true,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  true
+                                                                        },
+                                                                        {
+                                                                            "id":  "client",
+                                                                            "displayName":  "client",
+                                                                            "required":  true,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  true
+                                                                        },
+                                                                        {
+                                                                            "id":  "issue_content",
+                                                                            "displayName":  "issue_content",
+                                                                            "required":  true,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  true
+                                                                        },
+                                                                        {
+                                                                            "id":  "status",
+                                                                            "displayName":  "status",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  true
+                                                                        },
+                                                                        {
+                                                                            "id":  "issue_type",
+                                                                            "displayName":  "issue_type",
+                                                                            "required":  true,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  true
+                                                                        },
+                                                                        {
+                                                                            "id":  "source",
+                                                                            "displayName":  "source",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  true
+                                                                        },
+                                                                        {
+                                                                            "id":  "created_at",
+                                                                            "displayName":  "created_at",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "dateTime",
+                                                                            "canBeUsedToMatch":  true
+                                                                        },
+                                                                        {
+                                                                            "id":  "updated_at",
+                                                                            "displayName":  "updated_at",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "dateTime",
+                                                                            "canBeUsedToMatch":  true
+                                                                        },
+                                                                        {
+                                                                            "id":  "Agent_quess",
+                                                                            "displayName":  "Agent_quess",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  true
+                                                                        }
+                                                                    ],
+                                                         "attemptToConvertTypes":  false,
+                                                         "convertFieldsToString":  false
+                                                     },
+                                         "options":  {
+                                                         "outputColumns":  [
+                                                                               "status"
+                                                                           ]
+                                                     }
+                                     },
+                      "type":  "n8n-nodes-base.postgresTool",
+                      "typeVersion":  2.6,
+                      "position":  [
+                                       1552,
+                                       416
+                                   ],
+                      "id":  "19525cab-05e2-43ee-9011-684a49851536",
+                      "name":  "issue_tracker",
+                      "credentials":  {
+                                          "postgres":  {
+                                                           "id":  "",
+                                                           "name":  "Postgres account"
+                                                       }
+                                      }
+                  },
+                  {
+                      "parameters":  {
+                                         "model":  "openai/gpt-5.4-nano",
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "type":  "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+                      "typeVersion":  1,
+                      "position":  [
+                                       1280,
+                                       384
+                                   ],
+                      "id":  "dcbeab0a-057e-4175-b796-111d47adf406",
+                      "name":  "GPT5-mini",
+                      "credentials":  {
+                                          "openRouterApi":  {
+                                                                "id":  "",
+                                                                "name":  "OpenRouter account"
+                                                            }
+                                      }
+                  },
+                  {
+                      "parameters":  {
+                                         "jsonSchemaExample":  "{\n  \"status\": \"result\",\n  \"user_message\": \"🎬 Расчёт\\n- ...\\nИтого: ... EUR\"\n}\n"
+                                     },
+                      "type":  "@n8n/n8n-nodes-langchain.outputParserStructured",
+                      "typeVersion":  1.3,
+                      "position":  [
+                                       2256,
+                                       432
+                                   ],
+                      "id":  "8c0b4068-7f26-44f2-9238-ebcc42fa8d01",
+                      "name":  "Structured Output Parser"
+                  },
+                  {
+                      "parameters":  {
+                                         "descriptionType":  "manual",
+                                         "toolDescription":  "Tool: get_pricing (Цены и услуги)\nОписание: «Возвращает прайс: список услуг, цены, единицы (мин/шт/кинотеатр), описания. Используй для выбора услуг и расчёта базовой стоимости. Не содержит настройки наценок.»",
+                                         "documentId":  {
+                                                            "__rl":  true,
+                                                            "value":  "GOOGLE_SHEET_ID",
+                                                            "mode":  "list",
+                                                            "cachedResultName":  "DCP_for_robots",
+                                                            "cachedResultUrl":  "https://docs.google.com/spreadsheets/d/GOOGLE_SHEET_ID/edit?usp=drivesdk"
+                                                        },
+                                         "sheetName":  {
+                                                           "__rl":  true,
+                                                           "value":  363434453,
+                                                           "mode":  "list",
+                                                           "cachedResultName":  "Цены и услуги",
+                                                           "cachedResultUrl":  "https://docs.google.com/spreadsheets/d/GOOGLE_SHEET_ID/edit#gid=363434453"
+                                                       },
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "type":  "n8n-nodes-base.googleSheetsTool",
+                      "typeVersion":  4.7,
+                      "position":  [
+                                       2064,
+                                       432
+                                   ],
+                      "id":  "f5a2ac14-b0c6-4866-9876-ea3e61ab0818",
+                      "name":  "get_pricing",
+                      "credentials":  {
+                                          "googleSheetsOAuth2Api":  {
+                                                                        "id":  "",
+                                                                        "name":  "Google Sheets account"
+                                                                    }
+                                      }
+                  },
+                  {
+                      "parameters":  {
+                                         "descriptionType":  "manual",
+                                         "toolDescription":  "Tool: get_for_robots (for_robots)\nОписание: «Возвращает настройки расчёта: валюта, наценка 4K, наценка 3D, к каким услугам применяются наценки. Используй только для правил наценок и валюты.»",
+                                         "documentId":  {
+                                                            "__rl":  true,
+                                                            "value":  "GOOGLE_SHEET_ID",
+                                                            "mode":  "list",
+                                                            "cachedResultName":  "DCP_for_robots",
+                                                            "cachedResultUrl":  "https://docs.google.com/spreadsheets/d/GOOGLE_SHEET_ID/edit?usp=drivesdk"
+                                                        },
+                                         "sheetName":  {
+                                                           "__rl":  true,
+                                                           "value":  1729832389,
+                                                           "mode":  "list",
+                                                           "cachedResultName":  "for_robots",
+                                                           "cachedResultUrl":  "https://docs.google.com/spreadsheets/d/GOOGLE_SHEET_ID/edit#gid=1729832389"
+                                                       },
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "type":  "n8n-nodes-base.googleSheetsTool",
+                      "typeVersion":  4.7,
+                      "position":  [
+                                       1744,
+                                       432
+                                   ],
+                      "id":  "c186a044-2c9e-48b2-8be4-6967bbd6ccdc",
+                      "name":  "get_for_robots",
+                      "credentials":  {
+                                          "googleSheetsOAuth2Api":  {
+                                                                        "id":  "",
+                                                                        "name":  "Google Sheets account"
+                                                                    }
+                                      }
+                  },
+                  {
+                      "parameters":  {
+                                         "descriptionType":  "manual",
+                                         "toolDescription":  "Tool: get_knowledge (База знаний)\nОписание: «Возвращает справочник терминов/кодов (DCP, KDM, типы контента, форматы). Используй для понимания терминов и для уточняющих вопросов, не для цен.»",
+                                         "documentId":  {
+                                                            "__rl":  true,
+                                                            "value":  "GOOGLE_SHEET_ID",
+                                                            "mode":  "list",
+                                                            "cachedResultName":  "DCP_for_robots",
+                                                            "cachedResultUrl":  "https://docs.google.com/spreadsheets/d/GOOGLE_SHEET_ID/edit?usp=drivesdk"
+                                                        },
+                                         "sheetName":  {
+                                                           "__rl":  true,
+                                                           "value":  2129358867,
+                                                           "mode":  "list",
+                                                           "cachedResultName":  "База знаний",
+                                                           "cachedResultUrl":  "https://docs.google.com/spreadsheets/d/GOOGLE_SHEET_ID/edit#gid=2129358867"
+                                                       },
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "type":  "n8n-nodes-base.googleSheetsTool",
+                      "typeVersion":  4.7,
+                      "position":  [
+                                       1904,
+                                       432
+                                   ],
+                      "id":  "4f223f36-acf1-4585-9292-351b8b6042e1",
+                      "name":  "get_knowledge",
+                      "credentials":  {
+                                          "googleSheetsOAuth2Api":  {
+                                                                        "id":  "",
+                                                                        "name":  "Google Sheets account"
+                                                                    }
+                                      }
+                  },
+                  {
+                      "parameters":  {
+                                         "promptType":  "define",
+                                         "text":  "={{ $(\u0027set as any text\u0027).item.json.text }}",
+                                         "hasOutputParser":  true,
+                                         "options":  {
+                                                         "systemMessage":  "={{ $(\u0027get_prompt\u0027).item.json.prompt_text }}",
+                                                         "maxIterations":  6
+                                                     }
+                                     },
+                      "type":  "@n8n/n8n-nodes-langchain.agent",
+                      "typeVersion":  3.1,
+                      "position":  [
+                                       1520,
+                                       -16
+                                   ],
+                      "id":  "e435551a-c38b-4ddc-9f4f-a9a37f7edf76",
+                      "name":  "DCP_calc_assistant",
+                      "retryOnFail":  true,
+                      "onError":  "continueErrorOutput"
+                  },
+                  {
+                      "parameters":  {
+                                         "conditions":  {
+                                                            "options":  {
+                                                                            "caseSensitive":  true,
+                                                                            "leftValue":  "",
+                                                                            "typeValidation":  "strict",
+                                                                            "version":  3
+                                                                        },
+                                                            "conditions":  [
+                                                                               {
+                                                                                   "id":  "3e4e5482-6c76-4338-91e6-425cd7bfccca",
+                                                                                   "leftValue":  "={{ $json.output.status }}",
+                                                                                   "rightValue":  "Result",
+                                                                                   "operator":  {
+                                                                                                    "type":  "string",
+                                                                                                    "operation":  "equals"
+                                                                                                }
+                                                                               }
+                                                                           ],
+                                                            "combinator":  "and"
+                                                        },
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "type":  "n8n-nodes-base.if",
+                      "typeVersion":  2.3,
+                      "position":  [
+                                       2112,
+                                       0
+                                   ],
+                      "id":  "f7c0159f-0073-416b-b124-a1f9a507a7f8",
+                      "name":  "Result or clarify?"
+                  },
+                  {
+                      "parameters":  {
+                                         "operation":  "update",
+                                         "schema":  {
+                                                        "__rl":  true,
+                                                        "mode":  "list",
+                                                        "value":  "public"
+                                                    },
+                                         "table":  {
+                                                       "__rl":  true,
+                                                       "value":  "dcp_sessions",
+                                                       "mode":  "list",
+                                                       "cachedResultName":  "dcp_sessions"
+                                                   },
+                                         "columns":  {
+                                                         "mappingMode":  "defineBelow",
+                                                         "value":  {
+                                                                       "session_id":  "={{ $(\u0027set memory id\u0027).item.json.session_id }}",
+                                                                       "telegram_user_id":  "={{ $(\u0027set memory id\u0027).item.json.telegram_user_id }}",
+                                                                       "closed_reason":  "agent_closed",
+                                                                       "status":  "closed"
+                                                                   },
+                                                         "matchingColumns":  [
+                                                                                 "session_id",
+                                                                                 "telegram_user_id"
+                                                                             ],
+                                                         "schema":  [
+                                                                        {
+                                                                            "id":  "session_id",
+                                                                            "displayName":  "session_id",
+                                                                            "required":  true,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  true,
+                                                                            "removed":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "telegram_user_id",
+                                                                            "displayName":  "telegram_user_id",
+                                                                            "required":  true,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "number",
+                                                                            "canBeUsedToMatch":  true,
+                                                                            "removed":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "memory_key",
+                                                                            "displayName":  "memory_key",
+                                                                            "required":  true,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  true,
+                                                                            "removed":  true
+                                                                        },
+                                                                        {
+                                                                            "id":  "status",
+                                                                            "displayName":  "status",
+                                                                            "required":  true,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  true,
+                                                                            "removed":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "created_at",
+                                                                            "displayName":  "created_at",
+                                                                            "required":  true,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "dateTime",
+                                                                            "canBeUsedToMatch":  true,
+                                                                            "removed":  true
+                                                                        },
+                                                                        {
+                                                                            "id":  "last_activity_at",
+                                                                            "displayName":  "last_activity_at",
+                                                                            "required":  true,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "dateTime",
+                                                                            "canBeUsedToMatch":  true,
+                                                                            "removed":  true
+                                                                        },
+                                                                        {
+                                                                            "id":  "closed_reason",
+                                                                            "displayName":  "closed_reason",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  true
+                                                                        }
+                                                                    ],
+                                                         "attemptToConvertTypes":  false,
+                                                         "convertFieldsToString":  false
+                                                     },
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "type":  "n8n-nodes-base.postgres",
+                      "typeVersion":  2.6,
+                      "position":  [
+                                       2688,
+                                       -224
+                                   ],
+                      "id":  "54e26931-30ea-48fa-8fd3-8cebd8067860",
+                      "name":  "set closed1",
+                      "credentials":  {
+                                          "postgres":  {
+                                                           "id":  "",
+                                                           "name":  "Postgres account"
+                                                       }
+                                      }
+                  },
+                  {
+                      "parameters":  {
+                                         "chatId":  "={{ $(\u0027Telegram Trigger\u0027).item.json.message.from.id }}",
+                                         "text":  "=Ошибка при обработке Вашего запроса агентом, попробуйте еще раз с тем же сообщением 😔.",
+                                         "additionalFields":  {
+                                                                  "appendAttribution":  false,
+                                                                  "parse_mode":  "HTML"
+                                                              }
+                                     },
+                      "type":  "n8n-nodes-base.telegram",
+                      "typeVersion":  1.2,
+                      "position":  [
+                                       2528,
+                                       320
+                                   ],
+                      "id":  "8f356875-6105-422d-be1a-bfff93dc09f5",
+                      "name":  "Error!",
+                      "credentials":  {
+                                          "telegramApi":  {
+                                                              "id":  "",
+                                                              "name":  "Telegram account"
+                                                          }
+                                      }
+                  },
+                  {
+                      "parameters":  {
+                                         "chatId":  "={{ $(\u0027Telegram Trigger\u0027).item.json.message.from.id }}",
+                                         "text":  "={{ $json.output.user_message }}",
+                                         "additionalFields":  {
+                                                                  "appendAttribution":  false,
+                                                                  "parse_mode":  "HTML"
+                                                              }
+                                     },
+                      "type":  "n8n-nodes-base.telegram",
+                      "typeVersion":  1.2,
+                      "position":  [
+                                       2528,
+                                       144
+                                   ],
+                      "id":  "121f7654-5a75-4905-a6e0-4408787df96a",
+                      "name":  "Need data",
+                      "credentials":  {
+                                          "telegramApi":  {
+                                                              "id":  "",
+                                                              "name":  "Telegram account"
+                                                          }
+                                      }
+                  },
+                  {
+                      "parameters":  {
+                                         "operation":  "update",
+                                         "schema":  {
+                                                        "__rl":  true,
+                                                        "mode":  "list",
+                                                        "value":  "public"
+                                                    },
+                                         "table":  {
+                                                       "__rl":  true,
+                                                       "value":  "dcp_sessions",
+                                                       "mode":  "list",
+                                                       "cachedResultName":  "dcp_sessions"
+                                                   },
+                                         "columns":  {
+                                                         "mappingMode":  "defineBelow",
+                                                         "value":  {
+                                                                       "session_id":  "={{ $json.session_id }}",
+                                                                       "telegram_user_id":  "={{ $json.telegram_user_id }}",
+                                                                       "last_activity_at":  "={{ $now }}"
+                                                                   },
+                                                         "matchingColumns":  [
+                                                                                 "session_id",
+                                                                                 "telegram_user_id"
+                                                                             ],
+                                                         "schema":  [
+                                                                        {
+                                                                            "id":  "session_id",
+                                                                            "displayName":  "session_id",
+                                                                            "required":  true,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  true,
+                                                                            "removed":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "telegram_user_id",
+                                                                            "displayName":  "telegram_user_id",
+                                                                            "required":  true,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "number",
+                                                                            "canBeUsedToMatch":  true,
+                                                                            "removed":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "memory_key",
+                                                                            "displayName":  "memory_key",
+                                                                            "required":  true,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  true,
+                                                                            "removed":  true
+                                                                        },
+                                                                        {
+                                                                            "id":  "status",
+                                                                            "displayName":  "status",
+                                                                            "required":  true,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  true,
+                                                                            "removed":  true
+                                                                        },
+                                                                        {
+                                                                            "id":  "created_at",
+                                                                            "displayName":  "created_at",
+                                                                            "required":  true,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "dateTime",
+                                                                            "canBeUsedToMatch":  true,
+                                                                            "removed":  true
+                                                                        },
+                                                                        {
+                                                                            "id":  "last_activity_at",
+                                                                            "displayName":  "last_activity_at",
+                                                                            "required":  true,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "dateTime",
+                                                                            "canBeUsedToMatch":  true,
+                                                                            "removed":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "closed_reason",
+                                                                            "displayName":  "closed_reason",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  true,
+                                                                            "removed":  true
+                                                                        }
+                                                                    ],
+                                                         "attemptToConvertTypes":  false,
+                                                         "convertFieldsToString":  false
+                                                     },
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "type":  "n8n-nodes-base.postgres",
+                      "typeVersion":  2.6,
+                      "position":  [
+                                       -304,
+                                       -176
+                                   ],
+                      "id":  "43284a8a-0346-47e5-b62d-8c4e9b069694",
+                      "name":  "set last activity",
+                      "credentials":  {
+                                          "postgres":  {
+                                                           "id":  "",
+                                                           "name":  "Postgres account"
+                                                       }
+                                      }
+                  },
+                  {
+                      "parameters":  {
+                                         "chatId":  "={{ $(\u0027Telegram Trigger\u0027).item.json.message.from.id }}",
+                                         "text":  "={{ $json.output.user_message }}",
+                                         "additionalFields":  {
+                                                                  "appendAttribution":  false,
+                                                                  "parse_mode":  "HTML"
+                                                              }
+                                     },
+                      "type":  "n8n-nodes-base.telegram",
+                      "typeVersion":  1.2,
+                      "position":  [
+                                       2688,
+                                       -64
+                                   ],
+                      "id":  "5f422b96-638d-4ca1-b4bf-b622a6a8ae5e",
+                      "name":  "result",
+                      "credentials":  {
+                                          "telegramApi":  {
+                                                              "id":  "",
+                                                              "name":  "Telegram account"
+                                                          }
+                                      }
+                  },
+                  {
+                      "parameters":  {
+                                         "operation":  "select",
+                                         "schema":  {
+                                                        "__rl":  true,
+                                                        "mode":  "list",
+                                                        "value":  "public"
+                                                    },
+                                         "table":  {
+                                                       "__rl":  true,
+                                                       "value":  "prompt_library",
+                                                       "mode":  "list",
+                                                       "cachedResultName":  "prompt_library"
+                                                   },
+                                         "where":  {
+                                                       "values":  [
+                                                                      {
+                                                                          "column":  "bot_name",
+                                                                          "value":  "DCP_calc_assistant"
+                                                                      },
+                                                                      {
+                                                                          "column":  "status",
+                                                                          "value":  "active"
+                                                                      }
+                                                                  ]
+                                                   },
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "type":  "n8n-nodes-base.postgres",
+                      "typeVersion":  2.6,
+                      "position":  [
+                                       -2224,
+                                       16
+                                   ],
+                      "id":  "c0691a41-7640-4589-a911-e7f6cd198d96",
+                      "name":  "get_prompt",
+                      "credentials":  {
+                                          "postgres":  {
+                                                           "id":  "",
+                                                           "name":  "Postgres account"
+                                                       }
+                                      }
+                  },
+                  {
+                      "parameters":  {
+                                         "assignments":  {
+                                                             "assignments":  [
+                                                                                 {
+                                                                                     "id":  "7876f392-ac64-4fe8-810a-049445bc0755",
+                                                                                     "name":  "message",
+                                                                                     "value":  "={{ $(\u0027Telegram Trigger\u0027).item.json.message }}",
+                                                                                     "type":  "object"
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "158ac3cb-2fff-4f74-a548-316dab6e1eaa",
+                                                                                     "name":  "prompt_text",
+                                                                                     "value":  "={{ $json.prompt_text }}",
+                                                                                     "type":  "string"
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "bd555882-83cf-4b5f-9cca-9107b5ea9e11",
+                                                                                     "name":  "version",
+                                                                                     "value":  "={{ $json.version }}",
+                                                                                     "type":  "string"
+                                                                                 }
+                                                                             ]
+                                                         },
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "type":  "n8n-nodes-base.set",
+                      "typeVersion":  3.4,
+                      "position":  [
+                                       -2048,
+                                       16
+                                   ],
+                      "id":  "05eb03ee-e37c-47ca-a36a-5932163b07f9",
+                      "name":  "Edit Fields"
+                  },
+                  {
+                      "parameters":  {
+                                         "operation":  "sendChatAction",
+                                         "chatId":  "={{ $(\u0027Telegram Trigger\u0027).item.json.message.from.id }}"
+                                     },
+                      "type":  "n8n-nodes-base.telegram",
+                      "typeVersion":  1.2,
+                      "position":  [
+                                       1328,
+                                       -144
+                                   ],
+                      "id":  "363368e1-46b6-489b-931b-78e732f3334c",
+                      "name":  "Send a chat action",
+                      "credentials":  {
+                                          "telegramApi":  {
+                                                              "id":  "",
+                                                              "name":  "Telegram account"
+                                                          }
+                                      }
+                  }
+              ],
+    "connections":  {
+                        "Telegram Trigger":  {
+                                                 "main":  [
+                                                              [
+                                                                  {
+                                                                      "node":  "get_prompt",
+                                                                      "type":  "main",
+                                                                      "index":  0
+                                                                  }
+                                                              ]
+                                                          ]
+                                             },
+                        "Postgres Chat Memory":  {
+                                                     "ai_memory":  [
+                                                                       [
+                                                                           {
+                                                                               "node":  "DCP_calc_assistant",
+                                                                               "type":  "ai_memory",
+                                                                               "index":  0
+                                                                           }
+                                                                       ]
+                                                                   ]
+                                                 },
+                        "Generate UUID":  {
+                                              "main":  [
+                                                           [
+                                                               {
+                                                                   "node":  "Insert rows in a table",
+                                                                   "type":  "main",
+                                                                   "index":  0
+                                                               }
+                                                           ]
+                                                       ]
+                                          },
+                        "Open session exists?":  {
+                                                     "main":  [
+                                                                  [
+                                                                      {
+                                                                          "node":  "If last activity \u003e 8h",
+                                                                          "type":  "main",
+                                                                          "index":  0
+                                                                      }
+                                                                  ],
+                                                                  [
+                                                                      {
+                                                                          "node":  "Generate UUID",
+                                                                          "type":  "main",
+                                                                          "index":  0
+                                                                      }
+                                                                  ]
+                                                              ]
+                                                 },
+                        "Search opened session":  {
+                                                      "main":  [
+                                                                   [
+                                                                       {
+                                                                           "node":  "Open session exists?",
+                                                                           "type":  "main",
+                                                                           "index":  0
+                                                                       }
+                                                                   ]
+                                                               ]
+                                                  },
+                        "Get a file":  {
+                                           "main":  [
+                                                        [
+                                                            {
+                                                                "node":  "Transcribe a recording",
+                                                                "type":  "main",
+                                                                "index":  0
+                                                            }
+                                                        ]
+                                                    ]
+                                       },
+                        "Transcribe a recording":  {
+                                                       "main":  [
+                                                                    [
+                                                                        {
+                                                                            "node":  "set as any text",
+                                                                            "type":  "main",
+                                                                            "index":  0
+                                                                        }
+                                                                    ]
+                                                                ]
+                                                   },
+                        "set as text":  {
+                                            "main":  [
+                                                         [
+                                                             {
+                                                                 "node":  "set as any text",
+                                                                 "type":  "main",
+                                                                 "index":  0
+                                                             }
+                                                         ]
+                                                     ]
+                                        },
+                        "Insert rows in a table":  {
+                                                       "main":  [
+                                                                    [
+                                                                        {
+                                                                            "node":  "set memory id",
+                                                                            "type":  "main",
+                                                                            "index":  0
+                                                                        }
+                                                                    ]
+                                                                ]
+                                                   },
+                        "Switch":  {
+                                       "main":  [
+                                                    [
+                                                        {
+                                                            "node":  "Get a file",
+                                                            "type":  "main",
+                                                            "index":  0
+                                                        }
+                                                    ],
+                                                    [
+                                                        {
+                                                            "node":  "set as text",
+                                                            "type":  "main",
+                                                            "index":  0
+                                                        }
+                                                    ]
+                                                ]
+                                   },
+                        "set memory id":  {
+                                              "main":  [
+                                                           [
+                                                               {
+                                                                   "node":  "Switch",
+                                                                   "type":  "main",
+                                                                   "index":  0
+                                                               }
+                                                           ]
+                                                       ]
+                                          },
+                        "If last activity \u003e 8h":  {
+                                                           "main":  [
+                                                                        [
+                                                                            {
+                                                                                "node":  "set memory id",
+                                                                                "type":  "main",
+                                                                                "index":  0
+                                                                            },
+                                                                            {
+                                                                                "node":  "set last activity",
+                                                                                "type":  "main",
+                                                                                "index":  0
+                                                                            }
+                                                                        ],
+                                                                        [
+                                                                            {
+                                                                                "node":  "set closed",
+                                                                                "type":  "main",
+                                                                                "index":  0
+                                                                            }
+                                                                        ]
+                                                                    ]
+                                                       },
+                        "set closed":  {
+                                           "main":  [
+                                                        [
+                                                            {
+                                                                "node":  "Generate UUID",
+                                                                "type":  "main",
+                                                                "index":  0
+                                                            }
+                                                        ]
+                                                    ]
+                                       },
+                        "If":  {
+                                   "main":  [
+                                                [
+                                                    {
+                                                        "node":  "Hello!",
+                                                        "type":  "main",
+                                                        "index":  0
+                                                    }
+                                                ],
+                                                [
+                                                    {
+                                                        "node":  "Search opened session",
+                                                        "type":  "main",
+                                                        "index":  0
+                                                    }
+                                                ]
+                                            ]
+                               },
+                        "Hello!":  {
+                                       "main":  [
+                                                    [
+
+                                                    ]
+                                                ]
+                                   },
+                        "issue_tracker":  {
+                                              "ai_tool":  [
+                                                              [
+                                                                  {
+                                                                      "node":  "DCP_calc_assistant",
+                                                                      "type":  "ai_tool",
+                                                                      "index":  0
+                                                                  }
+                                                              ]
+                                                          ]
+                                          },
+                        "GPT5-mini":  {
+                                          "ai_languageModel":  [
+                                                                   [
+                                                                       {
+                                                                           "node":  "DCP_calc_assistant",
+                                                                           "type":  "ai_languageModel",
+                                                                           "index":  0
+                                                                       }
+                                                                   ]
+                                                               ]
+                                      },
+                        "set as any text":  {
+                                                "main":  [
+                                                             [
+                                                                 {
+                                                                     "node":  "DCP_calc_assistant",
+                                                                     "type":  "main",
+                                                                     "index":  0
+                                                                 },
+                                                                 {
+                                                                     "node":  "Send a chat action",
+                                                                     "type":  "main",
+                                                                     "index":  0
+                                                                 }
+                                                             ]
+                                                         ]
+                                            },
+                        "Structured Output Parser":  {
+                                                         "ai_outputParser":  [
+                                                                                 [
+                                                                                     {
+                                                                                         "node":  "DCP_calc_assistant",
+                                                                                         "type":  "ai_outputParser",
+                                                                                         "index":  0
+                                                                                     }
+                                                                                 ]
+                                                                             ]
+                                                     },
+                        "get_pricing":  {
+                                            "ai_tool":  [
+                                                            [
+                                                                {
+                                                                    "node":  "DCP_calc_assistant",
+                                                                    "type":  "ai_tool",
+                                                                    "index":  0
+                                                                }
+                                                            ]
+                                                        ]
+                                        },
+                        "get_for_robots":  {
+                                               "ai_tool":  [
+                                                               [
+                                                                   {
+                                                                       "node":  "DCP_calc_assistant",
+                                                                       "type":  "ai_tool",
+                                                                       "index":  0
+                                                                   }
+                                                               ]
+                                                           ]
+                                           },
+                        "get_knowledge":  {
+                                              "ai_tool":  [
+                                                              [
+                                                                  {
+                                                                      "node":  "DCP_calc_assistant",
+                                                                      "type":  "ai_tool",
+                                                                      "index":  0
+                                                                  }
+                                                              ]
+                                                          ]
+                                          },
+                        "DCP_calc_assistant":  {
+                                                          "main":  [
+                                                                       [
+                                                                           {
+                                                                               "node":  "Result or clarify?",
+                                                                               "type":  "main",
+                                                                               "index":  0
+                                                                           }
+                                                                       ],
+                                                                       [
+                                                                           {
+                                                                               "node":  "Error!",
+                                                                               "type":  "main",
+                                                                               "index":  0
+                                                                           }
+                                                                       ]
+                                                                   ]
+                                                      },
+                        "Result or clarify?":  {
+                                                   "main":  [
+                                                                [
+                                                                    {
+                                                                        "node":  "set closed1",
+                                                                        "type":  "main",
+                                                                        "index":  0
+                                                                    },
+                                                                    {
+                                                                        "node":  "result",
+                                                                        "type":  "main",
+                                                                        "index":  0
+                                                                    }
+                                                                ],
+                                                                [
+                                                                    {
+                                                                        "node":  "Need data",
+                                                                        "type":  "main",
+                                                                        "index":  0
+                                                                    }
+                                                                ]
+                                                            ]
+                                               },
+                        "set closed1":  {
+                                            "main":  [
+                                                         [
+
+                                                         ]
+                                                     ]
+                                        },
+                        "get_prompt":  {
+                                           "main":  [
+                                                        [
+                                                            {
+                                                                "node":  "Edit Fields",
+                                                                "type":  "main",
+                                                                "index":  0
+                                                            }
+                                                        ]
+                                                    ]
+                                       },
+                        "Edit Fields":  {
+                                            "main":  [
+                                                         [
+                                                             {
+                                                                 "node":  "If",
+                                                                 "type":  "main",
+                                                                 "index":  0
+                                                             }
+                                                         ]
+                                                     ]
+                                        }
+                    },
+    "settings":  {
+                     "executionOrder":  "v1",
+                     "availableInMCP":  false
+                 },
+    "meta":  {
+                 "templateCredsSetupCompleted":  true
+             }
+}
